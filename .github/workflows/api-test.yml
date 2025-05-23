@@ -1,0 +1,99 @@
+name: API Testing with APIdog
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:6.0
+        ports:
+          - 27017:27017
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Get PR Info
+        id: pr_info
+        run: |
+          echo "BRANCH_NAME=${{ github.head_ref || github.ref_name }}" >> $GITHUB_ENV
+          echo "PR_TITLE=${{ github.event.pull_request.title }}" >> $GITHUB_ENV
+          echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+          echo "PR_AUTHOR=${{ github.event.pull_request.user.login }}" >> $GITHUB_ENV
+          echo "PR_URL=${{ github.event.pull_request.html_url }}" >> $GITHUB_ENV
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Start API server
+        run: npm run start:dev &
+        env:
+          PORT: 3000
+          MONGODB_URI: mongodb://localhost:27017/api-testing
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+
+      - name: Wait for API server
+        run: |
+          timeout 30s bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:3000/health)" != "200" ]]; do sleep 2; done' || false
+
+      - name: Install Apidog CLI
+        run: npm install -g apidog-cli
+
+      - name: Running Product Test Scenarios
+        id: product_test_scenarios
+        run: |
+          set -e
+          apidog run --access-token ${{ secrets.APIDOG_TOKEN }} -f ${{ secrets.APIDOG_PRODUCT_COLLECTION_ID }} -e ${{ vars.APIDOG_ENV }} --verbose -r cli,html
+
+      - name: Running Order Test Scenarios
+        id: order_test_scenarios
+        run: |
+          set -e
+          apidog run --access-token ${{ secrets.APIDOG_TOKEN }} -f ${{ secrets.APIDOG_ORDER_COLLECTION_ID }} -e ${{ vars.APIDOG_ENV }} --verbose -r cli,html
+
+      - name: Running Auth Test Scenarios
+        id: auth_test_scenarios
+        run: |
+          set -e
+          apidog run --access-token ${{ secrets.APIDOG_TOKEN }} -f ${{ secrets.APIDOG_AUTH_COLLECTION_ID }} -e ${{ vars.APIDOG_ENV }} --verbose -r cli,html
+
+      - name: Upload ApiDog Test Report
+        if: always()
+        id: upload_apidog_report
+        uses: actions/upload-artifact@v4
+        with:
+          name: apidog-test-report
+          path: apidog-reports/*.html
+
+      - name: Post test results to PR
+        if: always()
+        run: |
+          REPORT_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts"
+          ARTIFACT_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/${{ steps.upload_apidog_report.outputs.artifact-id }}"
+          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          -d '{"body": "ApiDog test results are available: '"$REPORT_URL"'\n\nYou can download the artifact here: '"$ARTIFACT_URL"'"}' \
+          "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" 

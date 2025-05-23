@@ -15,12 +15,14 @@ import { LoginDto } from './dtos/login.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { AccessTokenRto } from './rtos/access-token.rto';
 import { UserRto } from './rtos/user.rto';
+import { Public } from './decorators/public.decorator';
 
 @UseInterceptors()
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @Post('register')
   async register(@Body() body: CreateUserDto): Promise<UserRto> {
     const user = await this.authService.register(body);
@@ -28,7 +30,8 @@ export class AuthController {
     return UserRto.fromDocument(user);
   }
 
-  @Get('login')
+  @Public()
+  @Post('login')
   async login(@Body() body: LoginDto): Promise<AccessTokenRto> {
     const response = await this.authService.login(body);
 
