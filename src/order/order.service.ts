@@ -62,6 +62,7 @@ export class OrderService {
 
   async findOne(id: string, userId: string): Promise<Order> {
     const order = await this.orderModel.findOne({ _id: id, userId }).exec();
+
     if (!order) {
       throw new NotFoundException(`Order with ID ${id} not found`);
     }
@@ -97,6 +98,7 @@ export class OrderService {
     // Restore product stock
     for (const item of order.items) {
       const product = await this.productService.findOne(item.productId);
+
       await this.productService.update(item.productId, {
         stock: product.stock + item.quantity,
       });
