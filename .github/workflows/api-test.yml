@@ -70,12 +70,11 @@ jobs:
           MONGODB_URI: mongodb://localhost:27017/api-testing
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
-      - name: Wait for API server
-        run: |
-          timeout 60s bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:3000/health)" != "200" ]]; do sleep 2; done' || false
-
       - name: Install Apidog CLI
         run: pnpm add -g apidog-cli
+
+      - name: Running seed Scenario
+        run: apidog run --access-token ${{ secrets.APIDOG_TOKEN }} -t 1193058 -e 3777685 -n 1 -r html,cli
 
       - name: Running Product Test Scenarios
         if: contains(github.event.pull_request.title, '[product]')
