@@ -78,18 +78,21 @@ jobs:
         run: pnpm add -g apidog-cli
 
       - name: Running Product Test Scenarios
+        if: contains(github.event.pull_request.title, '[product]')
         id: product_test_scenarios
         run: |
           set -e
           apidog run --access-token ${{ secrets.APIDOG_TOKEN }} -f ${{ secrets.APIDOG_PRODUCT_COLLECTION_ID }} -e ${{ vars.APIDOG_ENV }} --verbose -r cli,html
 
       - name: Running Order Test Scenarios
+        if: contains(github.event.pull_request.title, '[order]')
         id: order_test_scenarios
         run: |
           set -e
           apidog run --access-token ${{ secrets.APIDOG_TOKEN }} -f ${{ secrets.APIDOG_ORDER_COLLECTION_ID }} -e ${{ vars.APIDOG_ENV }} --verbose -r cli,html
 
       - name: Running Auth Test Scenarios
+        if: contains(github.event.pull_request.title, '[auth]')
         id: auth_test_scenarios
         run: |
           set -e
