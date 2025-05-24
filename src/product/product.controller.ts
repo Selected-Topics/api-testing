@@ -13,6 +13,7 @@ import {
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { JwtAuthGuard } from '../jwt-auth.guard';
+import { ProductRto } from './rtos/product.rto';
 
 @Controller('products')
 export class ProductController {
@@ -20,36 +21,39 @@ export class ProductController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productService.create(createProductDto);
+  async create(@Body() createProductDto: CreateProductDto) {
+    const product = await this.productService.create(createProductDto);
+    return ProductRto.fromDocument(product);
   }
 
   @Get()
-  findAll(@Query('category') category?: string) {
-    if (category) {
-      return this.productService.findByCategory(category);
-    }
-    return this.productService.findAll();
+  async findAll(@Query('category') category?: string) {
+    const products = category
+      ? await this.productService.findByCategory(category)
+      : await this.productService.findAll();
+    return ProductRto.fromDocuments(products);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    const product = await this.productService.findOne(id);
+    return ProductRto.fromDocument(product);
   }
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateProductDto: Partial<CreateProductDto>,
   ) {
-    return this.productService.update(id, updateProductDto);
+    const product = await this.productService.update(id, updateProductDto);
+    return ProductRto.fromDocument(product);
   }
 
   @Delete(':id')
   @HttpCode(204)
   @UseGuards(JwtAuthGuard)
-  remove(@Param('id') id: string) {
-    return this.productService.remove(id);
+  async remove(@Param('id') id: string) {
+    await this.productService.remove(id);
   }
 }

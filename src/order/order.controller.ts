@@ -11,50 +11,64 @@ import {
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderStatus } from './order.schema';
+import { OrderRto } from './rtos/order.rto';
 
 @Controller('orders')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Post()
-  create(@Request() req, @Body() createOrderDto: CreateOrderDto) {
-    return this.orderService.create(req.user.userId, createOrderDto);
+  async create(@Request() req, @Body() createOrderDto: CreateOrderDto) {
+    const order = await this.orderService.create(
+      req.user.userId,
+      createOrderDto,
+    );
+    return OrderRto.fromDocument(order);
   }
 
   @Get()
-  findAll(@Request() req) {
-    return this.orderService.findAll(req.user.userId);
+  async findAll(@Request() req) {
+    const orders = await this.orderService.findAll(req.user.userId);
+    return OrderRto.fromDocuments(orders);
   }
 
   @Get(':id')
-  findOne(@Request() req, @Param('id') id: string) {
-    return this.orderService.findOne(id, req.user.userId);
+  async findOne(@Request() req, @Param('id') id: string) {
+    const order = await this.orderService.findOne(id, req.user.userId);
+    return OrderRto.fromDocument(order);
   }
 
   @Patch(':id/status')
-  updateStatus(
+  async updateStatus(
     @Request() req,
     @Param('id') id: string,
     @Body('status') status: OrderStatus,
   ) {
-    return this.orderService.updateStatus(id, req.user.userId, status);
+    const order = await this.orderService.updateStatus(
+      id,
+      req.user.userId,
+      status,
+    );
+    return OrderRto.fromDocument(order);
   }
 
   @Patch(':id/cancel')
-  cancelOrder(@Request() req, @Param('id') id: string) {
-    return this.orderService.cancelOrder(id, req.user.userId);
+  async cancelOrder(@Request() req, @Param('id') id: string) {
+    const order = await this.orderService.cancelOrder(id, req.user.userId);
+    return OrderRto.fromDocument(order);
   }
 
   @Patch(':id/tracking')
-  addTrackingNumber(
+  async addTrackingNumber(
     @Request() req,
     @Param('id') id: string,
     @Body('trackingNumber') trackingNumber: string,
   ) {
-    return this.orderService.addTrackingNumber(
+    const order = await this.orderService.addTrackingNumber(
       id,
       req.user.userId,
       trackingNumber,
     );
+    return OrderRto.fromDocument(order);
   }
 }

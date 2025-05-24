@@ -85,7 +85,10 @@ export class OrderService {
   }
 
   async cancelOrder(id: string, userId: string): Promise<Order> {
-    const order = await this.findOne(id, userId);
+    const order = await this.orderModel.findOne({ _id: id, userId }).exec();
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${id} not found`);
+    }
 
     if (order.status === OrderStatus.DELIVERED) {
       throw new Error('Cannot cancel a delivered order');
@@ -99,8 +102,15 @@ export class OrderService {
       });
     }
 
-    order.status = OrderStatus.CANCELLED;
-    return order.save();
+    const updatedOrder = await this.orderModel
+      .findByIdAndUpdate(id, { status: OrderStatus.CANCELLED }, { new: true })
+      .exec();
+
+    if (!updatedOrder) {
+      throw new NotFoundException(`Order with ID ${id} not found`);
+    }
+
+    return updatedOrder;
   }
 
   async addTrackingNumber(

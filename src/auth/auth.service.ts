@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   UnauthorizedException,
+  BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
@@ -46,7 +47,7 @@ export class AuthService {
     });
 
     if (existingUser) {
-      throw new NotFoundException(ErrorMessage.USER_ALREADY_EXISTS);
+      throw new BadRequestException(ErrorMessage.USER_ALREADY_EXISTS);
     }
 
     const hashedPassword = await bcrypt.hash(userData.password, 10);

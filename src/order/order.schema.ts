@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Schema as MongooseSchema } from 'mongoose';
+import { Document, Schema as MongooseSchema, Types } from 'mongoose';
 
 export enum OrderStatus {
   PENDING = 'pending',
@@ -9,10 +9,15 @@ export enum OrderStatus {
   CANCELLED = 'cancelled',
 }
 
-@Schema({ timestamps: true })
+@Schema({
+  versionKey: false,
+  timestamps: true,
+})
 export class Order extends Document {
+  declare _id: Types.ObjectId;
+
   @Prop({ required: true, type: MongooseSchema.Types.ObjectId, ref: 'User' })
-  userId: string;
+  userId: Types.ObjectId;
 
   @Prop({ required: true })
   totalAmount: number;
@@ -68,6 +73,12 @@ export class Order extends Document {
 
   @Prop()
   notes?: string;
+
+  @Prop({ type: Date })
+  createdAt: Date;
+
+  @Prop({ type: Date })
+  updatedAt: Date;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
