@@ -64,7 +64,7 @@ jobs:
       - name: Install dependencies and run the project
         run: |
           pnpm install
-          NODE_OPTIONS="--max_old_space_size=4096" pnpm run start:dev &
+          NODE_OPTIONS="--max_old_space_size=4096" pnpm run start &
         env:
           PORT: 3000
           MONGODB_URI: mongodb://localhost:27017/api-testing
@@ -72,7 +72,7 @@ jobs:
 
       - name: Wait for API server
         run: |
-          timeout 30s bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:3000/health)" != "200" ]]; do sleep 2; done' || false
+          timeout 60s bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:3000/health)" != "200" ]]; do sleep 2; done' || false
 
       - name: Install Apidog CLI
         run: pnpm add -g apidog-cli
