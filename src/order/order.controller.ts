@@ -23,18 +23,21 @@ export class OrderController {
       req.user.userId,
       createOrderDto,
     );
+
     return OrderRto.fromDocument(order);
   }
 
   @Get()
   async findAll(@Request() req) {
     const orders = await this.orderService.findAll(req.user.userId);
+
     return OrderRto.fromDocuments(orders);
   }
 
   @Get(':id')
   async findOne(@Request() req, @Param('id') id: string) {
     const order = await this.orderService.findOne(id, req.user.userId);
+
     return OrderRto.fromDocument(order);
   }
 
@@ -49,12 +52,14 @@ export class OrderController {
       req.user.userId,
       status,
     );
+
     return OrderRto.fromDocument(order);
   }
 
   @Patch(':id/cancel')
   async cancelOrder(@Request() req, @Param('id') id: string) {
     const order = await this.orderService.cancelOrder(id, req.user.userId);
+
     return OrderRto.fromDocument(order);
   }
 
@@ -69,6 +74,7 @@ export class OrderController {
       req.user.userId,
       trackingNumber,
     );
+
     return OrderRto.fromDocument(order);
   }
 }
