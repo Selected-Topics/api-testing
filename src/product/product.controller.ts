@@ -21,13 +21,15 @@ export class ProductController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  async create(@Body() createProductDto: CreateProductDto) {
+  async create(
+    @Body() createProductDto: CreateProductDto,
+  ): Promise<ProductRto> {
     const product = await this.productService.create(createProductDto);
     return ProductRto.fromDocument(product);
   }
 
   @Get()
-  async findAll(@Query('category') category?: string) {
+  async findAll(@Query('category') category?: string): Promise<ProductRto[]> {
     const products = category
       ? await this.productService.findByCategory(category)
       : await this.productService.findAll();
@@ -35,7 +37,7 @@ export class ProductController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string): Promise<ProductRto> {
     const product = await this.productService.findOne(id);
     return ProductRto.fromDocument(product);
   }
@@ -45,7 +47,7 @@ export class ProductController {
   async update(
     @Param('id') id: string,
     @Body() updateProductDto: Partial<CreateProductDto>,
-  ) {
+  ): Promise<ProductRto> {
     const product = await this.productService.update(id, updateProductDto);
     return ProductRto.fromDocument(product);
   }
@@ -53,7 +55,7 @@ export class ProductController {
   @Delete(':id')
   @HttpCode(204)
   @UseGuards(JwtAuthGuard)
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string): Promise<void> {
     await this.productService.remove(id);
   }
 }
