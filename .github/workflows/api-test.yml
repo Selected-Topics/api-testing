@@ -69,6 +69,10 @@ jobs:
           PORT: 3000
           MONGODB_URI: mongodb://localhost:27017/api-testing
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          
+      - name: Wait for API server
+        run: |
+          timeout 60s bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:3000/health)" != "200" ]]; do sleep 2; done' || false
 
       - name: Install Apidog CLI
         run: pnpm add -g apidog-cli
