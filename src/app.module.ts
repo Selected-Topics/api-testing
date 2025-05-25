@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
-import jwtConfig from './config/jwt.config';
-import { ProductModule } from './product/product.module';
-import { OrderModule } from './order/order.module';
-import { HealthModule } from './health/health.module';
+import { ApiTokenGuard } from './auth/guards/api-token.guard';
 import { AuthenticationGuard } from './auth/guards/authentication.guard';
 import { JwtGuard } from './auth/guards/jwt.guard';
-import { ApiTokenGuard } from './auth/guards/api-token.guard';
+import jwtConfig from './config/jwt.config';
+import { HealthModule } from './health/health.module';
+import { OrderModule } from './order/order.module';
+import { ProductModule } from './product/product.module';
 
 @Module({
   imports: [
@@ -21,7 +21,13 @@ import { ApiTokenGuard } from './auth/guards/api-token.guard';
       isGlobal: true,
       load: [jwtConfig],
     }),
-    MongooseModule.forRoot('mongodb://localhost:27017/api-testing'),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGO_URI'),
+      }),
+      inject: [ConfigService],
+    }),
   ],
   providers: [
     {
