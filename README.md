@@ -1,9 +1,4 @@
 # CI/CD With APIDOG - Selected Topics Assignment
-
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
-
 ## Assignment Overview
 
 This project is an assignment for the "Selected Topics" course, focusing on implementing Continuous Integration and Continuous Deployment (CI/CD) using APIDOG for API testing. The project demonstrates the integration of modern development practices with automated testing workflows.
