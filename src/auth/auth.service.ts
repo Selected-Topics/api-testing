@@ -23,6 +23,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
+  // Finds a user by email
   async findByEmail(email: string): Promise<UserDocument | null> {
     const user = await this.userModel.findOne({
       email,
@@ -31,6 +32,7 @@ export class AuthService {
     return user;
   }
 
+  // Finds a user by email and throws if not found
   async findByEmailAndThrow(email: string): Promise<UserDocument> {
     const user = await this.findByEmail(email);
 
@@ -91,6 +93,7 @@ export class AuthService {
     );
   }
 
+  // Finds a user by ID and returns a UserRto
   async findUserById(userId: string): Promise<UserRto> {
     const profileObjectId = new Types.ObjectId(userId);
     const user = await this.userModel.findOne({ _id: profileObjectId });
