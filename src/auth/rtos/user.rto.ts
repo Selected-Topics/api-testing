@@ -28,8 +28,8 @@ export class UserRto {
   /**
    * Creates a UserRto instance from a UserDocument
    * Transforms the MongoDB document into a safe response object
-   * @param document - The MongoDB user document
-   * @returns A new UserRto instance
+   * document - The MongoDB user document
+   * new UserRto instance
    */
   static fromDocument(document: UserDocument): UserRto {
     return new UserRto(
