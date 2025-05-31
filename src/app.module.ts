@@ -21,7 +21,7 @@ import { ApiTokenGuard } from './auth/guards/api-token.guard';
       isGlobal: true,
       load: [jwtConfig],
     }),
-    MongooseModule.forRoot('mongodb://localhost:27017/api-testing'),
+    MongooseModule.forRoot('mongodb+srv://surafelwork32:bH6P3QyHBnns70QV@cluster0.hk8vprl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'),
   ],
   providers: [
     {
