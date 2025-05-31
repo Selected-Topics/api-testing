@@ -36,7 +36,10 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd aws_assg/api-testing-main
+            if [ ! -d "api-testing" ]; then
+              git clone https://github.com/Selected-Topics/api-testing.git
+            fi
+            cd api-testing
             git pull origin main
             pnpm install
             pnpm build
