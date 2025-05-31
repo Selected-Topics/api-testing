@@ -52,7 +52,7 @@ jobs:
             pnpm build
 
             echo "🚀 Deploying with PM2"
-            pm2 restart nest-api
+            pm2 restart api-testing
 
 
 
