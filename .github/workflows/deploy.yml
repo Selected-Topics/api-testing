@@ -36,8 +36,9 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd api-testing
+            cd aws_assg/api-testing-main
             git pull origin main
             pnpm install
             pnpm build
-            pm2 restart api-testing
+            pm2 start dist/main.js --name nest-api || pm2 restart nest-api
+
