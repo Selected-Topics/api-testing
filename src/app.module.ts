@@ -1,15 +1,16 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
-import jwtConfig from './config/jwt.config';
-import { ProductModule } from './product/product.module';
-import { OrderModule } from './order/order.module';
-import { HealthModule } from './health/health.module';
+import { ApiTokenGuard } from './auth/guards/api-token.guard';
 import { AuthenticationGuard } from './auth/guards/authentication.guard';
 import { JwtGuard } from './auth/guards/jwt.guard';
-import { ApiTokenGuard } from './auth/guards/api-token.guard';
+import jwtConfig from './config/jwt.config';
+import mongoConfig from './config/mongo.config';
+import { HealthModule } from './health/health.module';
+import { OrderModule } from './order/order.module';
+import { ProductModule } from './product/product.module';
 
 @Module({
   imports: [
@@ -19,9 +20,19 @@ import { ApiTokenGuard } from './auth/guards/api-token.guard';
     HealthModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [jwtConfig],
+      load: [jwtConfig, mongoConfig],
     }),
-    MongooseModule.forRoot('mongodb+srv://surafelwork32:bH6P3QyHBnns70QV@cluster0.hk8vprl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => {
+        const mongoConfig = configService.get<{ mongoUri: string }>('mongo');
+        const mongoUri = mongoConfig?.mongoUri;
+        return {
+          uri: mongoUri,
+        };
+      },
+      inject: [ConfigService],
+    }),
   ],
   providers: [
     {

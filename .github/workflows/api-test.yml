@@ -69,6 +69,9 @@ jobs:
           PORT: 3000
           MONGODB_URI: mongodb://localhost:27017/api-testing
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          
+      - name: Curl health endpoint
+        run: curl -v http://localhost:3000/health || true
 
       - name: Install Apidog CLI
         run: pnpm add -g apidog-cli
