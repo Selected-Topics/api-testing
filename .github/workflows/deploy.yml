@@ -36,12 +36,21 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            echo "🔄 Cloning repo if it doesn't exist"
             if [ ! -d "api-testing" ]; then
               git clone https://github.com/Selected-Topics/api-testing.git
             fi
             cd api-testing
+            echo "📥 Pulling latest changes"
             git pull origin main
-            pnpm install
+
+            echo "📦 Installing dependencies"
+            pnpm install --reporter=ndjson
+
+            echo "🏗️ Building project"
             pnpm build
+
+            echo "🚀 Restarting or starting with PM2"
             pm2 start dist/main.js --name nest-api || pm2 restart nest-api
+
 
